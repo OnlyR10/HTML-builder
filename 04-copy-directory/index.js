@@ -22,7 +22,9 @@ async function copyDir() {
       withFileTypes: true,
     });
     for (const file of files) {
-      await copyFile(path.join(pathToFolder, file.name), path.join(pathToNewFolder, file.name));
+      if (file.isFile()) {
+        await copyFile(path.join(pathToFolder, file.name), path.join(pathToNewFolder, file.name));
+      }
     }
 
   } catch (err) {

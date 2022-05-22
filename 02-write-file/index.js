@@ -1,8 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const process = require('process');
-
-const { stdin, stdout } = process;
+const { stdin, stdout } = require('process');
 
 const pathToText = path.join(__dirname, 'text.txt');
 
