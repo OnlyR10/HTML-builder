@@ -1,16 +1,24 @@
 const fs = require('fs');
 const path = require('path');
-const { mkdir, copyFile, readdir, rm, stat } = require('fs/promises');
+const { mkdir, copyFile, readdir, rm, stat, readFile, writeFile } = require('fs/promises');
 
 const pathToBundle = path.join(__dirname, 'project-dist', 'style.css');
 const pathToStyles = path.join(__dirname, 'styles');
 const pathToAssets = path.join(__dirname, 'assets');
 const pathToNewAssets = path.join(__dirname, 'project-dist', 'assets');
+const pathToComponents = path.join(__dirname, 'components');
 
 (async function () {
-  await createFolder();
-  copyFilesToFolder(pathToAssets, pathToNewAssets);
-  createBundle();
+  try {
+    await createFolder();
+    await Promise.all([
+      copyFilesToFolder(pathToAssets, pathToNewAssets),
+      createBundle(),
+      createHTMLFile(),
+    ]);
+  } catch (err) {
+    console.log(err.message);
+  }
 })();
 
 async function createFolder() {
@@ -63,4 +71,39 @@ async function copyFilesToFolder(pathToAssets, pathToNewAssets) {
   } catch (err) {
     console.error(err);
   }
+}
+
+async function readData() {
+  try {
+    const files = await readdir(pathToComponents, {
+      encoding: 'utf8',
+      withFileTypes: true,
+    });
+
+    const dataStore = {};
+
+    for (const file of files) {
+      if (file.isFile()) {
+        const data = await readFile(path.join(pathToComponents, file.name), 'utf-8');
+        dataStore[file.name] = data;
+      }
+    }
+
+    return dataStore;
+
+  } catch (err) {
+    console.log(err.message);
+  }
+}
+
+async function createHTMLFile() {
+  const componentsData = await readData();
+
+  let templateData = await readFile(path.join(__dirname, 'template.html'), 'utf-8');
+
+  for (const [key, value] of Object.entries(componentsData)) {
+    templateData = templateData.replace(new RegExp(`{{${path.basename(key, '.html')}}}`, 'g'), value);
+  }
+
+  writeFile(path.join(__dirname, 'project-dist', 'index.html'), `${templateData}`);
 }
