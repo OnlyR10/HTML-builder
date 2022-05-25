@@ -14,7 +14,7 @@ const pathToFolder = path.join(__dirname, 'secret-folder');
       if (file.isFile()) {
         const pathToFile = path.join(pathToFolder, `${file.name}`);
         fs.stat(pathToFile, (err, stats) => {
-          console.log(`${path.basename(pathToFile, path.extname(pathToFile))} - ${path.extname(pathToFile).slice(1)} - ${stats.size / 1000}kb`);
+          console.log(`${path.basename(pathToFile, path.extname(pathToFile))} - ${path.extname(pathToFile).slice(1)} - ${stats.size / 1024}kb`);
         });
       }
     }
